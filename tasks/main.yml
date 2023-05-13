@@ -1,0 +1,67 @@
+---
+- name: Install certbot
+  ansible.builtin.apt:
+    name: [ 'certbot' ]
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+  become: true
+
+- name: Create /var/www/acme directory
+  ansible.builtin.file:
+    path: /var/www/acme
+    state: directory
+  become: yes
+
+- name: Upload nginx acme config
+  ansible.builtin.template:
+    src: ./files/acme.conf.j2
+    dest: /etc/nginx/conf.d/acme.conf
+  become: yes
+  notify: Reload nginx
+
+- meta: flush_handlers
+
+- name: Run certbot
+  ansible.builtin.command: >
+    /usr/bin/certbot
+    certonly
+    --cert-name {{ cert_name }}
+    --webroot
+    --webroot-path /var/www/acme
+    --expand
+    {{ [ '--domain ' ] | product(domain_names) | map('join') | list | join( ' ' ) }}
+    --email {{ cert_email }}
+    --no-eff-email
+    --agree-tos
+    --hsts
+    --uir
+    --must-staple
+    --staple-ocsp
+    --non-interactive
+    --break-my-certs
+  register: result
+  changed_when: "'Certificate not yet due for renewal; no action taken.' not in result.stdout"
+  become: yes
+  notify: Reload nginx
+
+- name: Upload nginx ssl config
+  ansible.builtin.template:
+    src: ./files/ssl.conf.j2
+    dest: /etc/nginx/conf.d/ssl.conf
+  become: yes
+  notify: Reload nginx
+
+- name: Add certbot renew cron job
+  ansible.builtin.cron:
+    name: Certbot renew certificates
+    cron_file: certbot_renew
+    user: root
+    minute: 0
+    hour: 12
+    job: >
+      /usr/bin/certbot
+      renew
+      --non-interactive 
+      --post-hook '/usr/bin/systemctl reload nginx'
+  become: yes

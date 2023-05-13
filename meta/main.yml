@@ -1,0 +1,15 @@
+galaxy_info:
+  author: Action
+  description: Installs and configures certbot, and generates an ssl certificate
+  license: license GNU General Public License v3.0
+
+  min_ansible_version: 2.1
+
+  platforms:
+  - name: Debian
+    versions:
+    - 11
+
+  galaxy_tags: [ 'certbot', 'acme', 'nginx' ]
+
+dependencies: []

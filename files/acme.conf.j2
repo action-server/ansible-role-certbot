@@ -1,0 +1,15 @@
+server {
+	listen 80;
+	listen [::]:80;
+
+	server_name {{ domain_names | join(' ') | default('_', true) }};
+
+	location / {
+		return 301 https://$host$request_uri;
+	}
+
+	location /.well-known/acme-challenge {
+		root /var/www/acme;
+		try_files $uri $uri/ $uri.html =404;
+	}
+}

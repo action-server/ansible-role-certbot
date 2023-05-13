@@ -1,0 +1,15 @@
+ssl_session_timeout 86400s;
+ssl_session_cache shared:ssl_session_cache:10m;
+
+ssl_stapling on;
+ssl_stapling_verify on;
+resolver 1.1.1.1 1.0.0.1;
+resolver_timeout 10s;
+
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_prefer_server_ciphers on;
+ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384;
+
+ssl_certificate /etc/letsencrypt/live/{{ cert_name }}/fullchain.pem;
+ssl_certificate_key /etc/letsencrypt/live/{{ cert_name }}/privkey.pem;
+ssl_trusted_certificate /etc/letsencrypt/live/{{ cert_name }}/chain.pem;

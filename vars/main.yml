@@ -1,0 +1,4 @@
+---
+domain_names: [ 'example.com' ]
+cert_name: example.com
+cert_email: example@example.com
